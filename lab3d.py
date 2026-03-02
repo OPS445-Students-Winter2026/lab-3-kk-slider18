@@ -2,7 +2,11 @@
 #
 # Author ID: kmitchell34
 
+import subprocess
+
 def free_space():
-    import subprocess
-    disk_space = subprocess.Popen(["df -h | grep '/$' | awk '{print $4}'"])
-    print(disk_space.strip())
+    with subprocess.Popen(['df', '-h'], stdout=subprocess.PIPE) as df:
+        with subprocess.Popen(['grep', '/$'], stdin=df.stdout, stdout=subprocess.PIPE) as grep:
+            with subprocess.Popen(['awk', '{print $4}'], stdin=grep.stdout, stdout=subprocess.PIPE) as awk:
+                output, _ = awk.communicate()
+                return output.decode('utf-8').strip()
